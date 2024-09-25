@@ -1,35 +1,56 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.less'
+import { useEffect, useState } from 'react';
+import './App.less';
+import { getUsers } from './api/users';
+import { Select, message } from 'antd';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [users, setUsers] = useState<{ label: string; value: string }[]>([]);
+  const [user, setUser] = useState<string>('');
+  const [searchValue, setSearchValue] = useState<string>('');
+
+  useEffect(() => {
+    console.log(users)
+  }, [users])
+
+  const getUserList = async (keyword: string) => {
+    const res = await getUsers(keyword);
+    const {
+      data: { Response },
+    } = res;
+    console.log(Response)
+    if (Response.Data) {
+      console.log(Response.Data)
+      setUsers(
+        Response.Data.map(item => ({
+          label: `姓名:${item.UserName}, 年龄:${item.UserAge}`,
+          value: item.UserName,
+        }))
+      );
+      return;
+    }
+    if (Response.Error) {
+      message.error(`${Response.Error.Code}, ${Response.Error.Message}`);
+    }
+  };
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <Select
+        options={users}
+        value={user}
+        onChange={setUser}
+        showSearch
+        searchValue={searchValue}
+        onSearch={value => {
+          setSearchValue(value);
+          getUserList(value);
+        }}
+        filterOption={false}
+        style={{width: 200}}
+        allowClear
+      ></Select>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
