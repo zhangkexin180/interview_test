@@ -8,18 +8,12 @@ function App() {
   const [user, setUser] = useState<string>('');
   const [searchValue, setSearchValue] = useState<string>('');
 
-  useEffect(() => {
-    console.log(users)
-  }, [users])
-
   const getUserList = async (keyword: string) => {
     const res = await getUsers(keyword);
     const {
       data: { Response },
     } = res;
-    console.log(Response)
     if (Response.Data) {
-      console.log(Response.Data)
       setUsers(
         Response.Data.map(item => ({
           label: `姓名:${item.UserName}, 年龄:${item.UserAge}`,
