@@ -11,14 +11,13 @@ interface SelectItemType {
   key?: string;
 }
 
-interface IUserSelectProps extends SelectProps {
+interface IUserSelectProps extends Omit<SelectProps, 'children'> {
   fetchOptions?: (search: string) => Promise<SelectItemType[]>; //获取用户列表的方法
   debounceTimeout?: number;
   maxUserCount?: number; //最多显示多少用户
+  children?: React.ReactNode;
   leftSlot?: React.ReactNode;
   rightSlot?: React.ReactNode;
-  topSlot?: React.ReactNode;
-  bottomSlot?: React.ReactNode;
 }
 
 const UserSelect: React.FC<IUserSelectProps> = ({
@@ -71,6 +70,7 @@ const UserSelect: React.FC<IUserSelectProps> = ({
         />
         <div className='right'>{props.rightSlot}</div>
       </div>
+      {props.children}
     </div>
   );
 };
