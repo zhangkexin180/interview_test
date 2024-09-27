@@ -1,5 +1,6 @@
 import UserSelect from './components/UserSelect';
 import { useState } from 'react';
+import { InfoCircleOutlined } from '@ant-design/icons';
 import './App.less';
 
 function App() {
@@ -17,7 +18,9 @@ function App() {
         allowClear
         style={{ width: 600 }}
         leftSlot={<p>用户：</p>}
-      ></UserSelect>
+      >
+        <InfoCircleOutlined style={{margin: 6}} />
+      </UserSelect>
     </>
   );
 }

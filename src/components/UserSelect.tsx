@@ -69,8 +69,8 @@ const UserSelect: React.FC<IUserSelectProps> = ({
           options={options}
         />
         <div className='right'>{props.rightSlot}</div>
+        {props.children}
       </div>
-      {props.children}
     </div>
   );
 };
