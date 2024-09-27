@@ -1,5 +1,5 @@
 import { message } from "antd";
-import { getUsers } from "./users";
+import { getUsers } from "../api/users";
 
 
 interface UserValue {

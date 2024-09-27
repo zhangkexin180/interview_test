@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Select, Spin } from 'antd';
 import type { SelectProps } from 'antd';
 import debounce from 'lodash/debounce';
-import { getUserList } from '../api/common';
+import { getUserList } from '../utils/common';
 import './UserSelect.less';
 
 interface SelectItemType {
