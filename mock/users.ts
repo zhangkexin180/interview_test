@@ -1,9 +1,11 @@
-import Mock from 'mockjs';
+import { User } from '../src/api/users';
 
-const data = [
+const data: User[] = [
   { UserName: 'xiaoli', UserAge: 20 },
   { UserName: 'laoniu', UserAge: 50 },
   { UserName: 'ivykxzhang', UserAge: 30 },
+  { UserName: 'zhangsan', UserAge: 25 },
+  { UserName: 'lisi', UserAge: 46 },
 ];
 
 export default [
@@ -17,11 +19,13 @@ export default [
         msg: 'success',
         data: {
           Response: {
-            Data: data.filter(
-              item =>
-                item.UserName.indexOf(keyword) > -1 ||
-                String(item.UserAge) === keyword
-            ),
+            Data: keyword
+              ? data.filter(
+                  item =>
+                    item.UserName.indexOf(keyword) > -1 ||
+                    String(item.UserAge) === keyword
+                )
+              : data.slice(0, 10),
           },
         },
       };

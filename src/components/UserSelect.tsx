@@ -1,46 +1,77 @@
-import React, { useState } from 'react';
-import { getUsers } from '../api/users';
-import { Select, message } from 'antd';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Select, Spin } from 'antd';
+import type { SelectProps } from 'antd';
+import debounce from 'lodash/debounce';
+import { getUserList } from '../api/common';
+import './UserSelect.less';
 
-const UserSelect: React.FC = () => {
-  const [users, setUsers] = useState<{ label: string; value: string }[]>([]);
-  const [user, setUser] = useState<string>('');
-  const [searchValue, setSearchValue] = useState<string>('');
+interface SelectItemType {
+  label: React.ReactNode | string;
+  value: string | number;
+  key?: string;
+}
 
-  const getUserList = async (keyword: string) => {
-    const res = await getUsers(keyword);
-    const {
-      data: { Response },
-    } = res;
-    if (Response.Data) {
-      setUsers(
-        Response.Data.map(item => ({
-          label: `姓名:${item.UserName}, 年龄:${item.UserAge}`,
-          value: item.UserName,
-        }))
-      );
-      return;
-    }
-    if (Response.Error) {
-      message.error(`${Response.Error.Code}, ${Response.Error.Message}`);
-    }
-  };
+interface IUserSelectProps extends SelectProps {
+  fetchOptions?: (search: string) => Promise<SelectItemType[]>; //获取用户列表的方法
+  debounceTimeout?: number;
+  maxUserCount?: number; //最多显示多少用户
+  leftSlot?: React.ReactNode;
+  rightSlot?: React.ReactNode;
+  topSlot?: React.ReactNode;
+  bottomSlot?: React.ReactNode;
+}
+
+const UserSelect: React.FC<IUserSelectProps> = ({
+  fetchOptions = getUserList,
+  debounceTimeout = 800,
+  maxUserCount,
+  ...props
+}) => {
+  const [fetching, setFetching] = useState(false);
+  const [options, setOptions] = useState<SelectItemType[]>([]);
+  const fetchRef = useRef(0);
+
+  useEffect(() => {
+    fetchOptions('').then(newOptions => {
+      setOptions(newOptions.slice(0, maxUserCount || newOptions.length));
+    });
+  }, [fetchOptions, maxUserCount]);
+
+  const debounceFetcher = useMemo(() => {
+    const loadOptions = (value: string): void => {
+      fetchRef.current += 1;
+      const fetchId = fetchRef.current;
+      setOptions([]);
+      setFetching(true);
+
+      fetchOptions(value).then(newOptions => {
+        if (fetchId !== fetchRef.current) {
+          return;
+        }
+
+        setOptions(newOptions.slice(0, maxUserCount || newOptions.length));
+        setFetching(false);
+      });
+    };
+
+    return debounce(loadOptions, debounceTimeout);
+  }, [fetchOptions, debounceTimeout, maxUserCount]);
 
   return (
-    <Select
-      options={users}
-      value={user}
-      onChange={setUser}
-      showSearch
-      searchValue={searchValue}
-      onSearch={value => {
-        setSearchValue(value);
-        getUserList(value);
-      }}
-      filterOption={false}
-      style={{ width: 200 }}
-      allowClear
-    ></Select>
+    <div className='user-select'>
+      <div className='flex-row'>
+        <div className='left'>{props.leftSlot}</div>
+        <Select
+          labelInValue
+          filterOption={false}
+          onSearch={debounceFetcher}
+          notFoundContent={fetching ? <Spin size='small' /> : null}
+          {...props}
+          options={options}
+        />
+        <div className='right'>{props.rightSlot}</div>
+      </div>
+    </div>
   );
 };
 
